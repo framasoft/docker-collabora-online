@@ -1,4 +1,4 @@
-FROM docker.io/tiredofit/debian:bookworm as builder
+FROM docker.io/tiredofit/debian:bookworm AS builder
 LABEL maintainer="Dave Conroy (dave at tiredofit dot ca)"
 LABEL org.opencontainers.image.source="https://github.com/tiredofit/docker-collabora-online"
 
@@ -11,6 +11,8 @@ ARG MAX_CONNECTIONS
 ARG MAX_DOCUMENTS
 ARG APP_NAME
 ARG APP_BRAND
+ARG POCO_VERSION
+ARG POCO_URL
 
 ### Environment Variables
 ENV COLLABORA_ONLINE_VERSION=${COLLABORA_ONLINE_VERSION:-"cp-24.04.4-3"} \
@@ -33,8 +35,8 @@ COPY build-assets /build-assets
 
 RUN source /assets/functions/00-container && \
     set -x && \
-    echo "deb-src http://deb.debian.org/debian $(cat /etc/os-release |grep "VERSION=" | awk 'NR>1{print $1}' RS='(' FS=')') main" >> /etc/apt/sources.list && \
-    echo "deb http://deb.debian.org/debian $(cat /etc/os-release |grep "VERSION=" | awk 'NR>1{print $1}' RS='(' FS=')') contrib" >> /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian $(grep "VERSION_CODENAME=" /etc/os-release | cut -f 2 -d '=') main" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian $(grep "VERSION_CODENAME=" /etc/os-release | cut -f 2 -d '=') contrib" >> /etc/apt/sources.list && \
     package update && \
     apt-get -o Dpkg::Options::="--force-confold" upgrade -y && \
     \
@@ -200,7 +202,7 @@ RUN source /assets/functions/00-container && \
     set -x && \
     adduser --quiet --system --group --home /opt/cool cool && \
     \
-    echo "deb http://deb.debian.org/debian $(cat /etc/os-release |grep "VERSION=" | awk 'NR>1{print $1}' RS='(' FS=')') contrib" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian $(grep "VERSION_CODENAME=" /etc/os-release | cut -f 2 -d '=') contrib" >> /etc/apt/sources.list && \
     echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections && \
     package update && \
     apt-get -o Dpkg::Options::="--force-confold" upgrade -y && \
